@@ -106,7 +106,7 @@ export default function UserEdit() {
         alert(
           newStatus
             ? "✅ Kullanıcı aktifleştirildi."
-            : "🚫 Kullanıcı deaktifleştirildi."
+            : "🚫 Kullanıcı pasifleştirildi."
         );
 
         sessionStorage.setItem(
@@ -175,7 +175,7 @@ export default function UserEdit() {
                   : "bg-red-100 text-red-700"
               }`}
             >
-              {user.isActive ? "Aktif" : "Deaktif"}
+              {user.isActive ? "Aktif" : "Pasif"}
             </span>
 
             <button

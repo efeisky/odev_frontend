@@ -86,7 +86,7 @@ export default function Users() {
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
-            Deaktif
+            Pasif
           </button>
         </div>
 
@@ -120,7 +120,7 @@ export default function Users() {
                     {user.active ? (
                       <span className="text-green-600 font-medium">Aktif</span>
                     ) : (
-                      <span className="text-red-600 font-medium">Deaktif</span>
+                      <span className="text-red-600 font-medium">Pasif</span>
                     )}
                   </td>
                   <td className="py-2 px-4 flex gap-2">

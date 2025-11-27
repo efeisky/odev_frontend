@@ -1,3 +1,6 @@
+// Below is an updated version of your TaskAdd component with a full-screen
+// "Kaydediliyor..." loading overlay when the final save (handleFinish) runs.
+
 import {
   useState,
   useEffect,
@@ -38,12 +41,12 @@ interface User {
   name: string;
 }
 
-
 export default function TaskAdd() {
   const connection = APIConnection.getInstance();
   const [projects, setProjects] = useState<TaskProjects[]>([]);
   const [error, setError] = useState<string>("");
-  const [_, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
   const userCode = Cookies.get("user_code");
 
   const [task, setTask] = useState<TaskForm>({
@@ -164,54 +167,62 @@ export default function TaskAdd() {
         />,
       },
     ],
-    [projects, error, users, loadingUsers, task.attachments, task.users, task.subtasks, task]
+    [projects, error, users, loadingUsers, task]
   );
 
-  const handleFinish = async() => {
-      setLoading(true);
-      setError("");
-      try {
-        const payload = {
-          project_code: task.projectId,
-          created_by: userCode,
-          title: task.title,
-          description: task.description,
-          startDate: task.startDate,
-          endDate: task.endDate,
-          status_definition: task.status_definition,
-          priority_definition: task.priority_definition,
-          type_definition: task.type_definition,
-          attachments: task.attachments.map((attachment) => ({
-            name: attachment.name,
-            data: Array.from(new Uint8Array(attachment.data))
-          })),
-          subtasks: task.subtasks,
-          users: task.users
+  const handleFinish = async () => {
+    setSaving(true); // <-- SHOW LOADING SCREEN
+    setError("");
+    try {
+      const payload = {
+        project_code: task.projectId,
+        created_by: userCode,
+        title: task.title,
+        description: task.description,
+        startDate: task.startDate,
+        endDate: task.endDate,
+        status_definition: task.status_definition,
+        priority_definition: task.priority_definition,
+        type_definition: task.type_definition,
+        attachments: task.attachments.map((attachment) => ({
+          name: attachment.name,
+          data: Array.from(new Uint8Array(attachment.data))
+        })),
+        subtasks: task.subtasks,
+        users: task.users
+      };
 
-        }
-        const res = await connection.post(
-          "tasks/setTask", payload
-        );
-        if (res.status) {
-          alert("Görev kaydedildi.")
-        } else {
-          setError(res.message || "Projeler alınamadı.");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Projeler alınamadı. Sunucu ile bağlantı kurulamadı.");
-      } finally {
-        setLoading(false);
+      const res = await connection.post("tasks/setTask", payload);
+
+      if (res.status) {
+        alert("Görev kaydedildi.");
+      } else {
+        setError(res.message || "Görev kaydedilemedi.");
       }
+    } catch (err) {
+      console.error(err);
+      setError("Görev kaydedilemedi. Sunucu ile bağlantı kurulamadı.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex">
+    <div className="bg-gray-100 min-h-screen flex relative">
       <Sidebar />
       <Page>
         <PageHeader text="GÖREVLER - Görev Ekle" />
         <StepProgressTabs steps={stepComponents} onFinish={handleFinish} />
       </Page>
+
+      {saving && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50">
+        <div className="bg-white px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 animate-fadeIn">
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+        <div className="text-lg font-semibold text-gray-700">Görev Kaydediliyor...</div>
+        </div>
+        </div>
+      )}
     </div>
   );
 }

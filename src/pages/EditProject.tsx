@@ -9,6 +9,7 @@ import type { Item } from "../components/forms/ProjectFormStepsConstants";
 import type { IManager } from "./ProjectAdd";
 import EditProjectFormStepMain from "../components/editforms/ProjectEditFormStepMain";
 import EditProjectEditFormStepUsers from "../components/editforms/ProjectEditFormStepUsers";
+import Cookies from 'js-cookie'
 
 // ===================== Tipler =====================
 export type UserRole = "manager" | "admin" | "editor" | "viewer" | null;
@@ -96,8 +97,22 @@ export default function EditProject(): JSX.Element {
 
   // ------------------- Form Submit -------------------
   const handleFinish = async () => {
-    console.log("📤 Form submitted:", projectModel.projectForm);
-    alert("Proje başarıyla güncellendi!");
+    setError("");
+    try {
+      const user_code = Cookies.get("user_code");
+      const payload = {
+        ...projectModel.projectForm,
+        project_code: id,
+        edited_by: user_code
+      }
+      console.log(payload)
+      const res = await connection.put("project/editProject", payload);
+      if (res.status) alert("✅ Proje değişikliği kaydedildi!");
+      else setError(res.message || "Proje kaydedilemedi.");
+    } catch (error) {
+      console.error(error);
+      setError("Proje kaydedilemedi. Sunucu ile bağlantı kurulamadı.");
+    }
   };
 
   // ------------------- Fetch Project -------------------

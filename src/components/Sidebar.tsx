@@ -87,7 +87,7 @@ export default function Sidebar() {
 
   return (
     <nav className="bg-white shadow-sm w-60 min-h-screen px-4 py-8 flex flex-col gap-6 fixed">
-      <span className="flex items-center text-xl text-blue-600 font-semibold mb-8">
+      <span className="flex items-center text-xl text-blue-600 font-semibold mb-8 cursor-pointer" onClick={()=>{window.location.href = "/dashboard"}}>
         <FiCalendar className="mr-2" /> Proje Sistemi
       </span>
 
