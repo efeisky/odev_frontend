@@ -10,7 +10,11 @@ interface AuthResponse {
   auth: string | null,
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  onConnectionReady?: (connection: APIConnection) => void; // opsiyonel prop
+}
+
+export default function Sidebar({ onConnectionReady }: SidebarProps) {
   const connection = APIConnection.getInstance();
   const [role, setRole] = useState<UserRoles | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +39,10 @@ export default function Sidebar() {
       if (userCode && sessRole && Object.values(UserRoles).includes(sessRole as UserRoles)) {
         setRole(sessRole as UserRoles);
         setLoading(false);
+
+        // opsiyonel callback varsa çağır
+        if (onConnectionReady) onConnectionReady(connection);
+
         return;
       }
 
@@ -59,6 +67,8 @@ export default function Sidebar() {
           if (userCode && sessRole && Object.values(UserRoles).includes(sessRole as UserRoles)) {
             setRole(sessRole as UserRoles);
             setLoading(false);
+
+            if (onConnectionReady) onConnectionReady(connection);
           } else {
             alert("Problem oluştu.");
           }
@@ -69,9 +79,8 @@ export default function Sidebar() {
         window.location.href = "/login";
       }
     };
-
     checkRole();
-  }, [connection]);
+  }, []);
 
 
   if (loading) {
@@ -83,7 +92,6 @@ export default function Sidebar() {
   }
 
   if (!role) return null;
-
 
   return (
     <nav className="bg-white shadow-sm w-60 min-h-screen px-4 py-8 flex flex-col gap-6 fixed">

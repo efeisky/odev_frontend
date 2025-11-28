@@ -27,34 +27,43 @@ export interface DashboardResponseData {
   tasks_by_date: Record<string, string[]>;
 }
 
-
 const Dashboard: React.FC = () => {
-  const connection = APIConnection.getInstance();
+  const [connectionReady, setConnectionReady] = useState(false);
+  const [connection, setConnection] = useState<APIConnection | null>(null);
+
   const [data, setData] = useState<DashboardResponseData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [date, setDate] = useState<Date>(new Date());
   const [error, setError] = useState<string>("");
   const [summaryData, setSummaryData] = useState<{ name: string; value: number; color: string }[]>([]);
 
+  // Sidebar hazır olduğunda çağrılacak
+  const handleConnectionReady = (conn: APIConnection) => {
+    setConnection(conn);
+    setConnectionReady(true);
+  };
+
+  // Dashboard verilerini fetch et
   useEffect(() => {
+    if (!connectionReady || !connection) return;
+
     const fetchDashboard = async () => {
       setLoading(true);
       try {
-        const user_code = Cookies.get("user_code");
-        const res = await connection.get<DashboardResponseData>('general/dashboard', {"user_code": user_code})
-        if (res.status && res.data) {
-          console.log(res.data)
-          setData(res.data)
-          setSummaryData([
-            { name: "Yaklaşan Görevler", value: res.data.tasks_counts.nearly_count, color: "#F59E0B" },
-            { name: "Devam Eden Görevler", value: res.data.tasks_counts.ongoing_count, color: "#22C55E" },
-            { name: "Tamamlanan Görevler", value: res.data.tasks_counts.finished_count, color: "#3B82F6" },
-          ]);
-        } else {
-          setError(res.message);
-        }
+          const user_code = Cookies.get('user_code')
+          const res = await connection.get<DashboardResponseData>('general/dashboard', { "user_code": user_code });
+          if (res.status && res.data) {
+            setData(res.data);
+            setSummaryData([
+              { name: "Yaklaşan Görevler", value: res.data.tasks_counts.nearly_count, color: "#F59E0B" },
+              { name: "Devam Eden Görevler", value: res.data.tasks_counts.ongoing_count, color: "#22C55E" },
+              { name: "Tamamlanan Görevler", value: res.data.tasks_counts.finished_count, color: "#3B82F6" },
+            ]);
+          } else {
+            setError(res.message);
+          }
       } catch (err) {
-        console.log(err)
+        console.log(err);
         setError("Sunucu ile bağlantı kurulamadı.");
       } finally {
         setLoading(false);
@@ -62,10 +71,16 @@ const Dashboard: React.FC = () => {
     };
 
     fetchDashboard();
-  }, []);
+  }, [connectionReady, connection]);
 
-  
-  if (loading || !data) {
+  const formatDate = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <p className="text-gray-600 text-lg animate-pulse">
@@ -74,17 +89,12 @@ const Dashboard: React.FC = () => {
       </div>
     );
   }
-  const formatDate = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
+      <Sidebar onConnectionReady={handleConnectionReady} />
       <Page>
-        <div className="p-6 grid grid-cols-1 gap-6">
+        {data ? (<div className="p-6 grid grid-cols-1 gap-6">
 
           {/* Hoşgeldin Card */}
           <div className="relative bg-linear-to-r from-indigo-900 to-indigo-800 text-white p-8 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-between">
@@ -219,7 +229,8 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-        </div>
+        </div>) : (<></>)}
+        
       </Page>
     </div>
   );
