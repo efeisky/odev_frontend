@@ -122,20 +122,29 @@ const Dashboard: React.FC = () => {
 
           {/* 3’lü Card */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-start border-l-4 border-indigo-500">
+            <a 
+              href="/tasks?type=all"
+              className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-start border-l-4 border-indigo-500 cursor-pointer"
+            >
               <h3 className="text-gray-700 font-semibold text-lg mb-2">Toplam Görevler</h3>
               <p className="text-3xl font-bold text-gray-800">{data.tasks_counts.all_count}</p>
-            </div>
+            </a>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-start border-l-4 border-green-500">
+            <a 
+              href="/tasks?type=completed"
+              className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-start border-l-4 border-green-500 cursor-pointer"
+            >
               <h3 className="text-gray-700 font-semibold text-lg mb-2">Tamamlanan Görevler</h3>
               <p className="text-3xl font-bold text-green-600">{data.tasks_counts.finished_count}</p>
-            </div>
+            </a>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-start border-l-4 border-amber-500">
+            <a 
+              href="/tasks?type=upcoming"
+              className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-start border-l-4 border-amber-500 cursor-pointer"
+            >
               <h3 className="text-gray-700 font-semibold text-lg mb-2">Yaklaşan Görevler</h3>
               <p className="text-3xl font-bold text-amber-600">{data.tasks_counts.nearly_count}</p>
-            </div>
+            </a>
           </div>
 
           {/* Alt Alan: Sol geniş, Sağ dar */}
