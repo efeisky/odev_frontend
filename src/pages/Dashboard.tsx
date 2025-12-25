@@ -15,6 +15,10 @@ import { FiChevronRight, FiClock } from "react-icons/fi";
 import { APIConnection } from "../api/connection";
 import Cookies from 'js-cookie'
 
+interface INearTasks{
+  title: string;
+  days_left: number;
+}
 export interface DashboardResponseData {
   full_name: string;
   logs: string[];
@@ -25,6 +29,7 @@ export interface DashboardResponseData {
     ongoing_count: number;
   };
   tasks_by_date: Record<string, string[]>;
+  near_tasks: INearTasks[]
 }
 
 const Dashboard: React.FC = () => {
@@ -176,6 +181,57 @@ const Dashboard: React.FC = () => {
                 </ResponsiveContainer>
               </div>
 
+              {/*Yaklaşan Görevlerin Kaç Gün Kaldığı*/}
+              <div className="bg-white p-6 rounded-2xl shadow-lg">
+                <h2 className="font-semibold text-gray-700 mb-4">Yaklaşan Görevler</h2>
+
+                <ul className="space-y-3">
+                  {data.near_tasks.map((task, idx) => {
+                    const isUrgent = task.days_left <= 1;
+                    const isSoon = task.days_left <= 3;
+
+                    return (
+                      <li
+                        key={idx}
+                        className="flex items-center justify-between bg-gray-50 p-4 rounded-xl"
+                      >
+                        {/* Sol taraf */}
+                        <div className="flex items-center gap-3">
+                          <FiClock
+                            className={`${
+                              isUrgent
+                                ? "text-red-500"
+                                : isSoon
+                                ? "text-yellow-500"
+                                : "text-green-500"
+                            }`}
+                          />
+                          <span className="text-gray-800 font-medium">
+                            {task.title}
+                          </span>
+                        </div>
+
+                        {/* Sağ taraf - gün bilgisi */}
+                        <span
+                          className={`text-xs font-semibold px-3 py-1 rounded-full
+                            ${
+                              isUrgent
+                                ? "bg-red-100 text-red-600"
+                                : isSoon
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-green-100 text-green-600"
+                            }`}
+                        >
+                          {task.days_left === 0
+                            ? "Bugün"
+                            : `${task.days_left} gün kaldı`}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+              
               {/* Son 5 Log */}
               <div className="bg-white p-6 rounded-2xl shadow-lg">
                 <h2 className="font-semibold text-gray-700 mb-4">Son 5 Log</h2>
